@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0D0700">
+<meta name="description" content="Zaikofy — Homemade luxury meals crafted with love">
+<title>Zaikofy — Ghar Jaisa Pyaar</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ===== NAVBAR ===== -->
+<nav class="navbar" id="navbar">
+  <div class="nav-logo">ZAIKOFY <span>Ghar Jaisa Pyaar</span></div>
+  <div class="nav-actions">
+    <button class="icon-btn theme-toggle" id="themeBtn" onclick="toggleTheme()" title="Toggle theme">🌙</button>
+    <button class="icon-btn" onclick="goTo('pg-history')" title="Order History">📋</button>
+    <button class="cart-btn" onclick="openCart()">
+      🛒 Cart <span class="cart-count" id="cartCount">0</span>
+    </button>
+    <button class="icon-btn" onclick="openAdmin()" title="Admin Panel">⚙️</button>
+  </div>
+</nav>
+
+<!-- ===== CART DRAWER ===== -->
+<div class="drawer-overlay" id="cartOverlay" onclick="closeCart()"></div>
+<div class="cart-drawer" id="cartDrawer">
+  <div class="drawer-header">
+    <h3>🛒 Your Cart</h3>
+    <button class="close-btn" onclick="closeCart()">✕</button>
+  </div>
+  <div class="cart-items" id="cartItems"></div>
+  <div class="cart-footer" id="cartFooter"></div>
+</div>
+
+<!-- ===== ADMIN DRAWER ===== -->
+<div class="drawer-overlay" id="adminOverlay" onclick="closeAdmin()"></div>
+<div class="admin-drawer" id="adminDrawer">
+  <div class="drawer-header">
+    <h3>⚙️ Admin Panel</h3>
+    <button class="close-btn" onclick="closeAdmin()">✕</button>
+  </div>
+  <div id="adminLock" class="admin-lock">
+    <div class="lock-icon">🔐</div>
+    <p>Enter admin password</p>
+    <input type="password" id="adminPass" placeholder="Password" class="admin-input" onkeydown="if(event.key==='Enter')checkAdmin()">
+    <button class="gold-btn" onclick="checkAdmin()">Unlock</button>
+    <p class="hint-text">Hint: zaikofy123</p>
+  </div>
+  <div id="adminPanel" style="display:none">
+    <div class="admin-tabs">
+      <button class="atab active" onclick="switchAdminTab('orders',this)">Orders</button>
+      <button class="atab" onclick="switchAdminTab('menu',this)">Menu</button>
+      <button class="atab" onclick="switchAdminTab('revenue',this)">Revenue</button>
+    </div>
+    <div id="atab-orders" class="atab-content"><div id="adminOrders"></div></div>
+    <div id="atab-menu" class="atab-content" style="display:none">
+      <div class="add-item-form">
+        <h4>Add New Item</h4>
+        <input id="ai-name" placeholder="Item name" class="admin-input">
+        <input id="ai-price" placeholder="Price (₹)" type="number" class="admin-input">
+        <select id="ai-cat" class="admin-input">
+          <option>VEG</option><option>NON-VEG</option><option>SWEET</option><option>COMBO</option>
+        </select>
+        <select id="ai-mealtime" class="admin-input">
+          <option>Lunch</option><option>Breakfast</option><option>Dinner</option><option>Snacks</option><option>Sweets</option>
+        </select>
+        <input id="ai-img" placeholder="Image URL" class="admin-input">
+        <textarea id="ai-desc" placeholder="Description" class="admin-input" rows="2"></textarea>
+        <button class="gold-btn" onclick="adminAddItem()">+ Add Item</button>
+      </div>
+      <div id="adminMenuList"></div>
+    </div>
+    <div id="atab-revenue" class="atab-content" style="display:none">
+      <div id="revenueStats"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== FLYING DISH ANIMATION ===== -->
+<div class="fly-item" id="flyItem">🍛</div>
+
+<!-- ===== PAGE: HOME ===== -->
+<div class="page active" id="pg-home">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-text">
+      <span class="hero-tag">✦ HOMEMADE LUXURY</span>
+      <h1>Taste the <em>desi</em><br>magic of home</h1>
+      <p>Handcrafted meals with the warmth of a mother's kitchen — every bite tells a story.</p>
+      <button class="hero-cta" onclick="scrollToMenu()">Explore Menu ↓</button>
+    </div>
+    <div class="hero-visual">
+      <div class="hero-ring"></div>
+      <img class="hero-dish"
+        src="https://images.unsplash.com/photo-1604908177522-429cbe3f82c2?w=600&q=80"
+        alt="Featured dish"
+        onerror="this.src='https://images.unsplash.com/photo-1567337710282-00832b415979?w=600&q=80'">
+    </div>
+  </div>
+
+  <!-- DAILY SPECIAL BANNER -->
+  <div class="special-banner">
+    <div class="special-left">
+      <span class="special-badge">⭐ TODAY'S SPECIAL</span>
+      <h3 id="specialName">Paneer Butter Masala</h3>
+      <p id="specialDesc">Chef's pick — extra creamy today!</p>
+      <div class="special-price-row">
+        <span id="specialPrice" class="special-price">₹220</span>
+        <span class="special-discount">Save ₹30</span>
+      </div>
+    </div>
+    <div class="special-right">
+      <div class="countdown-label">Offer ends in</div>
+      <div class="countdown">
+        <div class="cd-block"><span id="cdH">00</span><small>hrs</small></div>
+        <div class="cd-sep">:</div>
+        <div class="cd-block"><span id="cdM">00</span><small>min</small></div>
+        <div class="cd-sep">:</div>
+        <div class="cd-block"><span id="cdS">00</span><small>sec</small></div>
+      </div>
+      <button class="special-order-btn" onclick="orderSpecial()">Order Now →</button>
+    </div>
+  </div>
+
+  <!-- SEARCH + FILTER -->
+  <div class="filter-bar" id="menuSection">
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input class="search-input" id="searchInput" placeholder="Search dishes…" oninput="filterMenu()">
+      <button class="clear-search" id="clearSearch" onclick="clearSearchInput()" style="display:none">✕</button>
+    </div>
+    <div class="filter-chips">
+      <button class="fchip active" data-filter="all" onclick="setFilter('all',this)">All</button>
+      <button class="fchip" data-filter="VEG" onclick="setFilter('VEG',this)">🥦 Veg</button>
+      <button class="fchip" data-filter="NON-VEG" onclick="setFilter('NON-VEG',this)">🍗 Non-Veg</button>
+      <button class="fchip" data-filter="SWEET" onclick="setFilter('SWEET',this)">🍮 Sweet</button>
+      <button class="fchip" data-filter="COMBO" onclick="setFilter('COMBO',this)">🍱 Combo</button>
+    </div>
+  </div>
+
+  <!-- CATEGORY TABS -->
+  <div class="cat-tabs">
+    <button class="ctab active" data-cat="all" onclick="setCategory('all',this)">All</button>
+    <button class="ctab" data-cat="Breakfast" onclick="setCategory('Breakfast',this)">🌅 Breakfast</button>
+    <button class="ctab" data-cat="Lunch" onclick="setCategory('Lunch',this)">☀️ Lunch</button>
+    <button class="ctab" data-cat="Dinner" onclick="setCategory('Dinner',this)">🌙 Dinner</button>
+    <button class="ctab" data-cat="Snacks" onclick="setCategory('Snacks',this)">🥨 Snacks</button>
+    <button class="ctab" data-cat="Sweets" onclick="setCategory('Sweets',this)">🍬 Sweets</button>
+  </div>
+
+  <!-- MENU GRID -->
+  <div class="menu-grid" id="menuGrid"></div>
+  <div class="no-results" id="noResults" style="display:none">
+    <p>😔 No dishes found</p>
+    <button class="gold-btn" onclick="resetFilters()">Clear Filters</button>
+  </div>
+</div>
+
+<!-- ===== PAGE: PRODUCT ===== -->
+<div class="page" id="pg-product">
+  <div class="product-wrap">
+    <div class="product-img-frame">
+      <img id="pImg" src="" alt="">
+      <button class="fav-btn-large" id="pFavBtn" onclick="toggleFavFromProduct()">🤍</button>
+    </div>
+    <div class="product-info">
+      <button class="back-btn" onclick="goTo('pg-home')">← Back to Menu</button>
+      <div class="hero-tag" id="pCategory" style="margin-bottom:12px">VEG</div>
+      <h1 id="pName"></h1>
+      <div class="price" id="pPrice"></div>
+      <p class="desc" id="pDesc"></p>
+
+      <div class="custom-section">
+        <div class="custom-group">
+          <label class="field-label">Spice Level</label>
+          <div class="chip-row" id="spiceRow">
+            <button class="chip selected" onclick="selectChip(this,'spice')">🌶 Mild</button>
+            <button class="chip" onclick="selectChip(this,'spice')">🌶🌶 Medium</button>
+            <button class="chip" onclick="selectChip(this,'spice')">🌶🌶🌶 Hot</button>
+          </div>
+        </div>
+        <div class="custom-group">
+          <label class="field-label">Add-ons</label>
+          <div class="chip-row" id="addonRow">
+            <button class="chip addon-chip" data-price="20" onclick="toggleAddon(this)">+ Extra Gravy ₹20</button>
+            <button class="chip addon-chip" data-price="15" onclick="toggleAddon(this)">+ Papad ₹15</button>
+            <button class="chip addon-chip" data-price="30" onclick="toggleAddon(this)">+ Raita ₹30</button>
+            <button class="chip addon-chip" data-price="25" onclick="toggleAddon(this)">+ Butter ₹25</button>
+          </div>
+        </div>
+        <div class="custom-group">
+          <label class="field-label">Remove Ingredients</label>
+          <div class="chip-row" id="removeRow">
+            <button class="chip remove-chip" onclick="toggleRemove(this)">No Onion</button>
+            <button class="chip remove-chip" onclick="toggleRemove(this)">No Garlic</button>
+            <button class="chip remove-chip" onclick="toggleRemove(this)">Less Oil</button>
+            <button class="chip remove-chip" onclick="toggleRemove(this)">No Cream</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="qty-row">
+        <label>Quantity</label>
+        <div class="qty-controls">
+          <button class="qty-btn" onclick="changeQty(-1)">−</button>
+          <span class="qty-num" id="qtyNum">1</span>
+          <button class="qty-btn" onclick="changeQty(1)">+</button>
+        </div>
+        <span class="total-price" id="itemTotal">₹0</span>
+      </div>
+
+      <div class="product-actions">
+        <button class="order-btn" onclick="addToCart()">Add to Cart 🛒</button>
+        <button class="order-btn-outline" onclick="addToCartAndCheckout()">Buy Now →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PAGE: CHECKOUT ===== -->
+<div class="page" id="pg-checkout">
+  <div class="checkout-wrap">
+    <button class="back-btn" onclick="openCart()" style="margin-bottom:20px">← Back to Cart</button>
+    <h1>Complete Your Order</h1>
+    <p class="sub-text">Fill in your delivery details</p>
+    <div class="checkout-items" id="checkoutItems"></div>
+    <div class="checkout-totals" id="checkoutTotals"></div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>First Name *</label>
+        <input id="firstName" placeholder="Rahul" type="text">
+      </div>
+      <div class="form-group">
+        <label>Last Name</label>
+        <input id="lastName" placeholder="Sharma" type="text">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Phone Number *</label>
+      <input id="phone" placeholder="+91 98765 43210" type="tel">
+    </div>
+    <div class="form-group">
+      <label>Delivery Address *</label>
+      <textarea id="address" placeholder="Flat no, Street, Area, City..." rows="3"></textarea>
+    </div>
+    <div class="form-group">
+      <label>Special Instructions</label>
+      <input id="notes" placeholder="Less oil, extra masala...">
+    </div>
+    <button class="confirm-btn" onclick="placeOrder()">✓ Confirm Order</button>
+  </div>
+</div>
+
+<!-- ===== PAGE: SUCCESS ===== -->
+<div class="page" id="pg-success">
+  <div class="success-wrap">
+    <div class="success-icon">🎉</div>
+    <h1>Order Placed!</h1>
+    <p>Being prepared with love. Estimated delivery: <strong>30–45 minutes</strong></p>
+    <div class="success-detail" id="successDetail"></div>
+    <div class="tracking-bar">
+      <div class="track-step active" id="ts1"><div class="track-dot"></div><span>Received</span></div>
+      <div class="track-line" id="tl1"></div>
+      <div class="track-step" id="ts2"><div class="track-dot"></div><span>Preparing</span></div>
+      <div class="track-line" id="tl2"></div>
+      <div class="track-step" id="ts3"><div class="track-dot"></div><span>On the Way</span></div>
+      <div class="track-line" id="tl3"></div>
+      <div class="track-step" id="ts4"><div class="track-dot"></div><span>Delivered</span></div>
+    </div>
+    <div class="success-btns">
+      <button class="home-btn" onclick="goHome()">← Order More</button>
+      <button class="whatsapp-btn" onclick="sendWhatsApp()">📱 WhatsApp</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PAGE: ORDER HISTORY ===== -->
+<div class="page" id="pg-history">
+  <div class="history-wrap">
+    <button class="back-btn" onclick="goTo('pg-home')" style="margin-bottom:24px">← Back</button>
+    <h1 style="font-family:'Playfair Display',serif;font-size:2rem;margin-bottom:6px">Order History</h1>
+    <p class="sub-text" style="margin-bottom:28px">Your past orders, saved locally</p>
+    <div id="historyList"></div>
+  </div>
+</div>
+
+<!-- ===== TOAST ===== -->
+<div class="toast" id="toast"></div>
+
+<script src="script.js"></script>
+</body>
+</html>
